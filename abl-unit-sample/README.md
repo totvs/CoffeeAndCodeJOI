@@ -1,2 +1,6 @@
 # CoffeeAndCodeJOI
-Esse repositório é dedicado ao compartilhamento de códigos e demais informações dos eventos **Coffee & Code JOI** organizado pela TOTVS. Para acompanhar e saber mais, siga nossa [página](https://www.facebook.com/developertotvs/) no Facebook.
+- Ao baixar os fontes, colocar em uma pasta "C:\CoffeeCode".
+- Fontes compilados em Progress 11.6
+- O comando "ant test" executa os arquivos com anotações reconhecidas pelo ABLUnit
+- O comando "ant coverage" gera o arquivo PROFILER do Progress
+- O comando "ant scanner" faz o processo completo e envia para o Sonar localizado no servidor surfistas:9090
