@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="coffeeCode" default="build">
+	<property name="project.abl-tests-dir"     value="${basedir}/fontes"/>	
+	<property name="project.abl-dest-dir"      value="${basedir}/dest"/>	
+	<property name="project.abl-build-dir"      value="${project.abl-dest-dir}/build"/>	
+	<property name="project.abl-dump-dir"      value="${project.abl-dest-dir}/dump"/>	
+	<property name="sonar-runner-dir" value="${basedir}/.."/>	
+	
+	<property name="project.coverage-output"   value="${project.abl-dest-dir}/coverage.xml"/>
+	
+	<property name="SONAR_URL" value="http://surfistas.jv01.local:9000"/>
+	<property name="project.propath"  value="${project.abl-tests-dir},${basedir},${basedir}/pct-src,//caetano/progress_repository/foundation/11.5.X-SNAPSHOT/src,C:/DLC116/gui,C:/DLC116/gui/ablunit.pl,C:/DLC116/gui/adecomm.pl,C:/DLC116/gui/adecomp.pl,C:/DLC116/gui/adedesk.pl,C:/DLC116/gui/adedict.pl,C:/DLC116/gui/adeedit.pl,C:/DLC116/gui/adeicon.pl,C:/DLC116/gui/aderes.pl,C:/DLC116/gui/adeshar.pl,C:/DLC116/gui/adetran.pl,C:/DLC116/gui/adeuib.pl,C:/DLC116/gui/adeweb.pl,C:/DLC116/gui/adexml.pl,C:/DLC116/gui/dataadmin.pl,C:/DLC116/gui/OpenEdge.BusinessLogic.pl,C:/DLC116/gui/OpenEdge.Core.pl,C:/DLC116/gui/OpenEdge.ServerAdmin.pl,C:/DLC116/gui/prodict.pl,C:/dlc116/gui/netlib/OpenEdge.Net.pl,C:/DLC116/gui/protools.pl,C:/DLC116,C:/DLC116/bin"/>	
+	<property name="dbdir"  value="c:/dlc116"/>	
+	<property name="dbname"  value="sports"/>	
+	<taskdef resource="PCT.properties"   classpath="./PCT-208.jar" loaderRef="pct"/>
+	<typedef resource="types.properties" classpath="./PCT-208.jar" loaderRef="pct"/>
+	<property name="project.dumpschema"      value="${basedir}/shim-api/proparse/api/schemadump1.p"/>	
+	<DlcHome value="C:/dlc116"/>
+
+	<target name="connectdb" >
+		<DBConnectionSet id="abl">
+			<DBConnection dbName="${dbname}"  dbDir="${dbdir}" singleUser="true" readOnly="true"/>		
+		</DBConnectionSet>
+	</target>
+
+	<target name="schema" depends="connectdb">
+		<path id="compilation.propath">
+			<pathelement path="${project.propath}" />
+		</path>
+	
+		<PCTRun procedure="${project.dumpschema}" tempDir="${basedir}/schema" graphicalMode="true">
+			<propath refid="compilation.propath" />		
+			<DBConnectionSet refid="abl"/>
+		</PCTRun>
+	</target>
+	
+	<target name="build">
+		<mkdir dir="${project.abl-build-dir}"/>	
+		<path id="compilation.propath">
+			<pathelement path="${project.propath}" />
+		</path>
+	
+		<PCTCompile token="1600" stackSize="1024" dateFormat="dmy" cpStream="IBM850" inputChars="32000" 
+					maximumMemory="6000" tempDir="c:/tmp" destDir="${project.abl-build-dir}" forceCompile="true" graphicalMode="true"
+					listing="true" relativePaths="true" xmlXref="true" keepXref="true">
+			<fileset dir="${project.abl-tests-dir}" includes="**/*.p,**/*.py,**/*.w,**/*.cls"/>
+			<propath refid="compilation.propath" />
+			<DBConnectionSet >
+				<DBConnection dbName="${dbname}"  dbDir="${dbdir}" singleUser="true" readOnly="true"/>		
+			</DBConnectionSet>
+			
+		</PCTCompile>
+	</target>
+	
+	<target name="test">    
+		<mkdir dir="${project.abl-dest-dir}" />
+
+		<path id="compilation.propath">
+			<pathelement path="${project.propath}" />
+		</path>
+		<ABLUnit destDir="${project.abl-dest-dir}" writeLog="true" graphicalMode="true">
+			<profiler enabled="true" outputFile="${project.abl-dest-dir}/unit.out" coverage="true" listings="${project.abl-build-dir}/.pct"/>		
+			<fileset dir="${project.abl-tests-dir}" includes="**/suite.p" />
+<!--			<fileset dir="${project.abl-tests-dir}" includes="**/json*.p" />			-->
+			<propath refid="compilation.propath" />			
+			<DBConnectionSet >
+				<DBConnection dbName="${dbname}"  dbDir="${dbdir}" singleUser="true" readOnly="true"/>		
+			</DBConnectionSet>
+			
+        </ABLUnit>
+    </target>
+
+	<target name="coverage">
+		<java classname="SonarCoverage" fork="true" failOnError="true">
+
+			<arg line='${project.abl-dest-dir}/unit.out'/>
+			<arg line='${project.abl-build-dir}/.pct'/>
+			<arg line='${project.coverage-output}'/>			
+			
+			<classpath location="${basedir}/progresscoverage.jar"/>
+		</java>
+	</target>
+	<!--
+	<target name="makeDump">	
+		<mkdir dir="${project.abl-dump-dir}" />		
+		<PCTDumpSchema destFile="${project.abl-dump-dir}/sports.df">
+			<DBConnection dbName="${dbname}" dbDir="${dbdir}" singleUser="true" readOnly="true"/>		
+		</PCTDumpSchema>
+	</target>	
+	-->
+	<target name="scanner">
+		<touch file="${project.coverage-output}"   mkdirs="true" verbose="true"/>
+		
+		<java classname="org.sonarsource.scanner.cli.Main" fork="true" failOnError="true">
+			<jvmarg value="-Drunner.home=."/>
+			<jvmarg value="-Dproject.home=."/>
+			<jvmarg value="-Dsonar.host.url=${SONAR_URL}"/>
+			<jvmarg value="-Dsonar.oe.dlc=${DLC_HOME}"/>
+
+			<arg line="-X"/>
+			<classpath location="${basedir}/sonar-scanner-cli-3.0.3.778.jar"/>
+		</java>
+	</target>
+	
+	<target name="sonar" depends="build,test,coverage,scanner"/>
+</project>
