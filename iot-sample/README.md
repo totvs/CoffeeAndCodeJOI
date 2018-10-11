@@ -11,6 +11,21 @@
 - Configurar a IDE para reconhecer o NodeMCU em: Menu Arquivo -> Preferencias
     - URLs Adicionais para Gerenciadores de Placas: http://arduino.esp8266.com/stable/package_esp8266com_index.json
 - Carregar o programa;
+- ajustar o SSID e PASSWORD com a rede WIFI que sera conectada, para isso localize as linhas abaixo nos programas e informe os dados:
+    const char* ssid = "xxxx";          // nome da rede
+    const char* password = "xxxx"; 
 - Connectar o NodeMCU;
 - Clicar no botao Carregar para fazer o upload do programa dentro do NodeMCU.
- 
+- Para testar:
+    - Ligar o NodeMCU na energia;
+    - Ligar o Monitor Serial na IDE do Arduino;
+    - Sera apresentado o endereco IP que o NodeMCU conseguiu obter e um contador de execucao;
+    - OBS: por default as leituras do sensor vem desligado e tera que ser ligado atraves do comando " http://<ip_do_nodeMCU>/on ".
+    - Em um navegador conectado na mesma rede de WIFI, informar os seguintes comandos (neste exemplo utilizaremos o ip 192.168.43.88 obtido do NodeMCU):
+        - http://192.168.43.88/on   -> Liga o monitoramento do sensor
+        - http://192.168.43.88/off  -> Desliga o monitoramento do sensor
+        - http://192.168.43.88/get  -> Obtem a leitura atual do sensor
+        - http://192.168.43.88/cap  -> Captura o endereco IP de quem realizou a requisicao no NodeMCU.
+                                       Tentara enviar para o chamador a leitura atual atraves da porta 8181.
+                                       Caso nao esteja disponivel a porta 8181 ou falhar em qualquer envio, o envio de informacoes sera desligado e este comando deverá ser feito novamente quando a porta 8181 do chamador estiver funcionando.
+
