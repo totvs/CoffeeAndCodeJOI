@@ -29,7 +29,7 @@ PROCEDURE setVariables:
                          + 'set BPSERVER_BIN=%DLC%\oebpm\server\bin' + chr(10)
                          + 'set PATH=%DLC%\BIN;%BPSERVER_BIN%;%DLC%\PERL\BIN;%PATH%' + chr(10)
                          + 'set LIB=%DLC%\LIB;%LIB%' + CHR(10)
-           certDirectory = '\\jvd003095\ablunit\quente\postman#NUMBER.cer'.
+           certDirectory = 'c:/coffeecode/fontes/postman#NUMBER.cer'.
 END PROCEDURE.
 
 @Test.
